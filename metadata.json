@@ -1,5 +1,5 @@
 {
-  "name": "Project SME",
+  "name": "Dashboard",
   "description": "SME Power & OWS Live Alarm Management System dengan Auto-Discovery Master Site, Telemetri Daya, PM Tracking, dan Export Laporan.",
   "requestFramePermissions": [],
   "majorCapabilities": [
