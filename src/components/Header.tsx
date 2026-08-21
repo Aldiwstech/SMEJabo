@@ -7,10 +7,13 @@ import {
   FileSpreadsheet, 
   ShieldCheck, 
   Menu, 
+  X,
   ClipboardPaste, 
   FileUp, 
   SlidersHorizontal,
-  FileText
+  FileText,
+  Layers,
+  ChevronDown
 } from 'lucide-react';
 import { 
   downloadMasterSiteTemplate, 
@@ -44,85 +47,155 @@ export const Header: React.FC<HeaderProps> = ({
   autoDiscoveredCount
 }) => {
   const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Zap },
-    { id: 'datasite', label: 'Data Site', icon: Database, badge: autoDiscoveredCount > 0 ? `${autoDiscoveredCount} Baru` : undefined },
-    { id: 'nms', label: 'OWS / NMS Alarm', icon: Radio },
-    { id: 'maintenance', label: 'Maintenance & Support', icon: SlidersHorizontal },
-    { id: 'pm', label: 'Jadwal PM', icon: FileSpreadsheet },
-    { id: 'history', label: 'Riwayat Status', icon: FileText },
+    { id: 'dashboard', label: 'Dashboard Utama', desc: 'Ringkasan alarm, status PLN, Genset & Baterai', icon: Zap },
+    { id: 'datasite', label: 'Data Master Site', desc: 'Daftar site telemetri & auto-discovery', icon: Database, badge: autoDiscoveredCount > 0 ? `${autoDiscoveredCount} Baru` : undefined },
+    { id: 'nms', label: 'OWS / NMS Live Alarm', desc: 'Log feed alarm, parsing & rekonsiliasi', icon: Radio },
+    { id: 'maintenance', label: 'Maintenance & Support', desc: 'Rekomendasi teknis & SLA backup daya', icon: SlidersHorizontal },
+    { id: 'pm', label: 'Jadwal PM (Preventive)', desc: 'Kalender & checklist pemeliharaan rutin', icon: FileSpreadsheet },
+    { id: 'history', label: 'Riwayat Log Status', desc: 'Audit trail perubahan status & alarm site', icon: FileText },
   ];
 
   return (
-    <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-40 px-3 sm:px-6 py-2.5">
+    <header className="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-50 px-3 sm:px-6 py-2.5 shadow-xl">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         
-        {/* Brand & Title */}
+        {/* POJOK KIRI ATAS: TOMBOL MENU UTAMA + BRANDING */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition border border-slate-700"
-            aria-label="Menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+          
+          {/* TOMBOL MENU AKSES POJOK KIRI ATAS */}
+          <div className="relative">
+            <button
+              id="btn-main-navigation-menu"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all border font-bold text-xs shadow-lg ${
+                isMenuOpen
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 ring-2 ring-amber-400/40 shadow-amber-500/20'
+                  : 'bg-slate-900 hover:bg-slate-800 text-slate-100 border-slate-700 hover:border-amber-500/60'
+              }`}
+              aria-label="Menu Akses Navigasi"
+              title="Klik untuk membuka menu akses"
+            >
+              {isMenuOpen ? (
+                <X className="w-4 h-4 text-slate-950" />
+              ) : (
+                <Menu className="w-4 h-4 text-amber-400" />
+              )}
+              <span className="font-black tracking-wider text-xs">MENU</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMenuOpen ? 'rotate-180 text-slate-950' : 'text-slate-400'}`} />
+            </button>
 
+            {/* DROPDOWN MENU POJOK KIRI ATAS */}
+            {isMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs"
+                  onClick={() => setIsMenuOpen(false)}
+                />
+                <div className="absolute left-0 mt-2.5 w-80 sm:w-88 bg-slate-900 border border-slate-700/90 rounded-2xl shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 ring-1 ring-white/10">
+                  <div className="px-2.5 py-1.5 mb-2 border-b border-slate-800 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-amber-400 font-bold text-[11px] uppercase tracking-wider">
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Menu Akses Modul</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-medium">Project SME</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    {navItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeView === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            onSelectView(item.id);
+                            setIsMenuOpen(false);
+                          }}
+                          className={`w-full flex items-start gap-3 p-2.5 rounded-xl transition text-left ${
+                            isActive
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                              : 'text-slate-200 hover:bg-slate-800/90 hover:text-white border border-transparent'
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg shrink-0 mt-0.5 ${
+                            isActive ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'
+                          }`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="text-xs font-bold truncate">{item.label}</span>
+                              {item.badge && (
+                                <span className="text-[9px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.5 rounded-full shrink-0">
+                                  {item.badge}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight line-clamp-1">{item.desc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Quick Action Buttons inside Menu */}
+                  <div className="mt-2.5 pt-2.5 border-t border-slate-800 grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        onOpenMasterImport();
+                        setIsMenuOpen(false);
+                      }}
+                      className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                    >
+                      <Database className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Import Site</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        onOpenAddSite();
+                        setIsMenuOpen(false);
+                      }}
+                      className="p-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm"
+                    >
+                      <span>+ Tambah Site</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Logo & Info Project */}
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/25 shrink-0">
-              <Zap className="w-6 h-6 text-slate-950 fill-current" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/25 shrink-0">
+              <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950 fill-current" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-sm sm:text-base tracking-wider text-white">
                   PROJECT SME
                 </span>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full flex items-center gap-1">
+                <span className="hidden sm:flex px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                   OWS Auto-Sync
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">Power Management & Telemetry System</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-400">Power Management & Telemetry System</p>
             </div>
           </div>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1 text-xs">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeView === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onSelectView(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition font-medium relative ${
-                  isActive
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{item.label}</span>
-                {item.badge && (
-                  <span className="text-[9px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.2 rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Action Header Buttons */}
+        {/* Action Header Buttons (Kanan) */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           
           {/* Quick Paste OWS Log */}
           <button
             onClick={onOpenOWSPaste}
             title="Paste log teks langsung dari OWS"
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-2.5 sm:px-3 py-1.5 rounded-lg shadow-sm transition"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-2.5 sm:px-3 py-2 rounded-xl shadow-sm transition"
           >
             <ClipboardPaste className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Paste OWS</span>
@@ -132,7 +205,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onOpenNMSImport}
             title="Unggah file log alarm OWS / NMS (.xlsx, .csv)"
-            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-700 transition"
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs px-2.5 sm:px-3 py-2 rounded-xl border border-slate-700 transition font-medium"
           >
             <FileUp className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden md:inline">Import OWS</span>
@@ -143,7 +216,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
               title="Download Template Format Excel"
-              className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-700 transition"
+              className="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs px-2.5 sm:px-3 py-2 rounded-xl border border-slate-700 transition font-medium"
             >
               <Download className="w-3.5 h-3.5 text-blue-400" />
               <span className="hidden lg:inline">Template</span>
@@ -164,7 +237,7 @@ export const Header: React.FC<HeaderProps> = ({
                       downloadMasterSiteTemplate();
                       setShowTemplateDropdown(false);
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 hover:bg-slate-800 rounded-lg text-left text-slate-200"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 hover:bg-slate-800 rounded-lg text-left text-slate-200 transition"
                   >
                     <Database className="w-4 h-4 text-emerald-400 shrink-0" />
                     <div>
@@ -177,7 +250,7 @@ export const Header: React.FC<HeaderProps> = ({
                       downloadPMTemplate();
                       setShowTemplateDropdown(false);
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 hover:bg-slate-800 rounded-lg text-left text-slate-200"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 hover:bg-slate-800 rounded-lg text-left text-slate-200 transition"
                   >
                     <FileSpreadsheet className="w-4 h-4 text-amber-400 shrink-0" />
                     <div>
@@ -190,7 +263,7 @@ export const Header: React.FC<HeaderProps> = ({
                       downloadSampleOWSFeed();
                       setShowTemplateDropdown(false);
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 hover:bg-slate-800 rounded-lg text-left text-slate-200"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 hover:bg-slate-800 rounded-lg text-left text-slate-200 transition"
                   >
                     <Radio className="w-4 h-4 text-cyan-400 shrink-0" />
                     <div>
@@ -206,7 +279,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Export Report Button */}
           <button
             onClick={onOpenExport}
-            className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs px-2.5 sm:px-3 py-1.5 rounded-lg transition font-semibold"
+            className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs px-2.5 sm:px-3 py-2 rounded-xl transition font-semibold"
           >
             <Download className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export</span>
@@ -216,10 +289,10 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onToggleAdmin}
             title={isAdmin ? "Mode Admin Aktif (Klik untuk ubah)" : "Mode Viewer (Klik untuk aktifkan Admin)"}
-            className={`p-1.5 rounded-lg transition border flex items-center gap-1 ${
+            className={`p-2 rounded-xl transition border flex items-center gap-1 ${
               isAdmin
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                : 'bg-slate-800 text-slate-400 border-slate-700'
+                : 'bg-slate-900 text-slate-400 border-slate-700'
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
@@ -229,62 +302,6 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
       </div>
-
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden pt-3 pb-2 border-t border-slate-800 mt-2 space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeView === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onSelectView(item.id);
-                  setMobileMenuOpen(false);
-                }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium ${
-                  isActive
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                    : 'text-slate-300 hover:bg-slate-800'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span className="text-[9px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.5 rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-          
-          <div className="pt-2 flex gap-2">
-            <button
-              onClick={() => {
-                onOpenMasterImport();
-                setMobileMenuOpen(false);
-              }}
-              className="flex-1 py-2 bg-slate-800 text-slate-300 text-xs rounded-lg border border-slate-700 flex items-center justify-center gap-1"
-            >
-              <Database className="w-3.5 h-3.5 text-blue-400" />
-              <span>Import Master</span>
-            </button>
-            <button
-              onClick={() => {
-                onOpenAddSite();
-                setMobileMenuOpen(false);
-              }}
-              className="flex-1 py-2 bg-red-600 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1"
-            >
-              <span>+ Tambah Site</span>
-            </button>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
